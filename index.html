@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Capacitor App</title>
+    <title>Employee Salary Portal</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; font-family: Arial, sans-serif; overflow: hidden; background-color: #ffffff; }
-        iframe { width: 100%; height: 100%; border: none; }
+        iframe { width: 100%; height: 100%; border: none; display: none; }
         #error-screen { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background-color: #ffffff; position: absolute; top: 0; left: 0; z-index: 10; text-align: center; }
-        .error-box h2 { color: #e74c3c; margin-bottom: 10px; }
-        .error-box p { color: #555; margin-bottom: 20px; }
-        .error-box button { background-color: #3498db; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; }
-        .hidden { display: none !important; }
+        .error-box h2 { color: #e74c3c; margin-bottom: 10px; font-size: 22px; }
+        .error-box p { color: #555; margin-bottom: 20px; font-size: 16px; }
+        .error-box button { background-color: #007bff; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .error-box button:active { background-color: #0056b3; }
     </style>
 </head>
 <body>
 
-    <!-- एरर स्क्रीन जो इंटरनेट न होने पर दिखेगी -->
-    <div id="error-screen" class="hidden">
+    <!-- एरर स्क्रीन: इंटरनेट न होने पर सिर्फ यही दिखेगा -->
+    <div id="error-screen">
         <div class="error-box">
-            <h2>⚠️ कोई इंटरनेट नहीं है</h2>
+            <h2>⚠️ कोई इंटरनेट कनेक्शन नहीं है</h2>
             <p>कृपया अपना मोबाइल डेटा या वाई-फ़ाई ऑन करें।</p>
             <button onclick="checkInternetAndLoad()">फिर से कोशिश करें 🔄</button>
         </div>
     </div>
 
-    <!-- आईफ्रेम (डिफ़ॉल्ट रूप से बिना src के ताकि ब्राउज़र एरर न दे) -->
-    <iframe id="web-view" class="hidden"></iframe>
+    <!-- आईफ्रेम: इसमें शुरू में कोई src नहीं है और यह पूरी तरह छुपा हुआ है -->
+    <iframe id="web-view"></iframe>
 
     <script>
-        // यहाँ अपनी वेबसाइट का असली URL डालें
+        // आपका सही सैलरी पोर्टल URL
         const TARGET_URL = "https://ydvaditya20-creator.github.io/LL-salary/"; 
 
         function checkInternetAndLoad() {
@@ -38,22 +38,25 @@
             const webView = document.getElementById('web-view');
 
             if (navigator.onLine) {
-                errorScreen.classList.add('hidden');
-                webView.classList.remove('hidden');
+                // इंटरनेट होने पर: एरर छुपाएं, iframe दिखाएं और फिर URL लोड करें
+                errorScreen.style.display = 'none';
+                webView.style.display = 'block';
                 
-                // केवल इंटरनेट होने पर ही URL असाइन करें
                 if (webView.src !== TARGET_URL) {
                     webView.src = TARGET_URL;
                 }
             } else {
-                // इंटरनेट बंद होने पर iframe छुपाएं और src खाली कर दें ताकि डिफ़ॉल्ट एंड्रॉइड एरर गायब हो जाए
-                webView.classList.add('hidden');
-                webView.src = "about:blank"; 
-                errorScreen.classList.remove('hidden');
+                // इंटरनेट बंद होने पर: iframe को पूरी तरह गायब करें और src को साफ रखें
+                webView.style.display = 'none';
+                webView.removeAttribute('src'); 
+                errorScreen.style.display = 'flex';
             }
         }
 
+        // ऐप खुलते ही इंटरनेट चेक करने के लिए
         window.addEventListener('DOMContentLoaded', checkInternetAndLoad);
+
+        // लाइव इंटरनेट बदलने पर ट्रैक करने के लिए
         window.addEventListener('online', checkInternetAndLoad);
         window.addEventListener('offline', checkInternetAndLoad);
     </script>
