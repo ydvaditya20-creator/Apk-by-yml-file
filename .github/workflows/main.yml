@@ -60,6 +60,10 @@ jobs:
 
   - name: Sync Android
     run: npx cap sync android
+    
+  - name: Show Android Files
+    run: |
+         find android -name MainActivity.*
 
   - name: Build APK
     run: |
