@@ -26,8 +26,20 @@ jobs:
 
   - name: Add Network State Permission safely
     run: |
-        npx cap-configure run --android-permissions="android.permission.ACCESS_NETWORK_STATE"
-
+        node -e "
+        const fs = require('fs');
+        const path = 'android/app/src/main/AndroidManifest.xml';
+        if (fs.existsSync(path)) {
+          let content = fs.readFileSync(path, 'utf8');
+          if (!content.includes('ACCESS_NETWORK_STATE')) {
+            content = content.replace('</manifest>', '    <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\n</manifest>');
+            fs.writeFileSync(path, content, 'utf8');
+            console.log('Permission added successfully!');
+          }
+        } else {
+          console.log('Manifest file not found at expected path');
+        }
+        "
 
   - name: Install Dependencies
     run: npm install
