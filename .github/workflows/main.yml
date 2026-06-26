@@ -24,7 +24,9 @@ jobs:
       distribution: temurin
       java-version: '21'
 
-
+  - name: Add Network State Permission to Manifest
+    run: |
+        sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" \/>' android/app/src/main/AndroidManifest.xml
 
   - name: Install Dependencies
     run: npm install
