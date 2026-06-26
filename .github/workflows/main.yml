@@ -64,6 +64,10 @@ jobs:
   - name: Show Android Files
     run: |
          find android -name MainActivity.*
+  - name: Check File Content
+    run: cat android/app/src/main/java/com/example/myapp/MainActivity.java
+
+
 
   - name: Build APK
     run: |
