@@ -17,7 +17,7 @@
 </head>
 <body>
 
-    <!-- एरर स्क्रीन -->
+    <!-- एरर स्क्रीन जो इंटरनेट न होने पर दिखेगी -->
     <div id="error-screen" class="hidden">
         <div class="error-box">
             <h2>⚠️ कोई इंटरनेट नहीं है</h2>
@@ -26,10 +26,13 @@
         </div>
     </div>
 
-    <!-- आईफ्रेम (यहाँ https://example.com की जगह अपना वेबसाइट URL डालें) -->
-    <iframe id="web-view" src="https://ydvaditya20-creator.github.io/LL-salary/" class="hidden"></iframe>
+    <!-- आईफ्रेम (डिफ़ॉल्ट रूप से बिना src के ताकि ब्राउज़र एरर न दे) -->
+    <iframe id="web-view" class="hidden"></iframe>
 
     <script>
+        // यहाँ अपनी वेबसाइट का असली URL डालें
+        const TARGET_URL = "https://ydvaditya20-creator.github.io/LL-salary/"; 
+
         function checkInternetAndLoad() {
             const errorScreen = document.getElementById('error-screen');
             const webView = document.getElementById('web-view');
@@ -37,12 +40,19 @@
             if (navigator.onLine) {
                 errorScreen.classList.add('hidden');
                 webView.classList.remove('hidden');
-                webView.src = webView.src; // रीलोड करने के लिए
+                
+                // केवल इंटरनेट होने पर ही URL असाइन करें
+                if (webView.src !== TARGET_URL) {
+                    webView.src = TARGET_URL;
+                }
             } else {
+                // इंटरनेट बंद होने पर iframe छुपाएं और src खाली कर दें ताकि डिफ़ॉल्ट एंड्रॉइड एरर गायब हो जाए
                 webView.classList.add('hidden');
+                webView.src = "about:blank"; 
                 errorScreen.classList.remove('hidden');
             }
         }
+
         window.addEventListener('DOMContentLoaded', checkInternetAndLoad);
         window.addEventListener('online', checkInternetAndLoad);
         window.addEventListener('offline', checkInternetAndLoad);
