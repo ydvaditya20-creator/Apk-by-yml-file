@@ -53,7 +53,7 @@ jobs:
 
   - name: Create Capacitor Config
     run: |
-      echo '{"appId":"com.example.myapp","appName":"MyApp","webDir":"www"}' > capacitor.config.json
+      echo '{"appId":"com.example.myttapp","appName":"MyttApp","webDir":"www"}' > capacitor.config.json
 
   - name: Add Android
     run: npx cap add android
@@ -65,7 +65,7 @@ jobs:
     run: |
          find android -name MainActivity.*
   - name: Check File Content
-    run: cat android/app/src/main/java/com/example/myapp/MainActivity.java
+    run: cat android/app/src/main/java/com/example/myttapp/MainActivity.java
 
 
 
