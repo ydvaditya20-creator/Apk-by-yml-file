@@ -81,8 +81,7 @@ jobs:
           echo "=== 4. Finding HTML/JS assets inside Android Project ==="
           find android/app/src/main/assets/ -type f || echo "Assets not compiled here yet"
           
-          echo "=== 5. Final Generated APK Location & Name ==="
-          find android/app/build/outputs/apk/ -type f
+          
 
   - name: Build APK
     run: |
