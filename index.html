@@ -175,7 +175,7 @@ function csvToJson(csvText) {
     const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ''));
     const result = [];
 
-    for (let i = 1; i < lines.length; i++) {
+    for (let i = 3; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
         
         const currentLine = [];
