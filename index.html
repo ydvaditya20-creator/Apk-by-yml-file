@@ -170,22 +170,23 @@
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTfgXD0Gp6sgfHle6CuNaTDfGGVTgay8-ZaYbO161POxfxAjo9s0ysmglv6_JHsasboyKKIYxDF2V4Q/pubhtml?gid=1259613237&single=true"; 
 
 // CSV format ko Javascript object mein badalne ka function
-function csvToJson(csvText) {
-    const lines = csvText.split("\n");
-    
-    // Row 3 aapka sub(main) header hai jisme Column Names hain
-    // JavaScript indexing 0 se shuru hoti hai, isliye Row 3 = Index 2
-    const headerLine = lines[2]; 
-    if (!headerLine) return [];
-    
-    const headers = headerLine.split(",").map(h => h.trim().replace(/^"|"$/g, ''));
-    const result = [];
 
-    // Data Row 4 se shuru ho raha hai (Row 4 = Index 3)
+// ==========================================
+// CONFIGURATION: Apni Google Sheet ka CSV URL dalein
+// ==========================================
+const SHEET_CV_URL = "YOUR_GOOGLE_SHEET_CSV_URL_HERE"; 
+
+// CSV data ko exact array index ke hisaab se parse karne ka function
+function parseCsvData(csvText) {
+    const lines = csvText.split("\n");
+    const allRows = [];
+
+    // Row 4 se data shuru hai (JavaScript index = 3)
+    // Hum pehle ki 3 rows (Index 0, 1, 2) ko skip kar rahe hain
     for (let i = 3; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
         
-        const currentLine = [];
+        const currentRow = [];
         let insideQuote = false;
         let entry = "";
         
@@ -193,27 +194,19 @@ function csvToJson(csvText) {
             if (char === '"') {
                 insideQuote = !insideQuote;
             } else if (char === ',' && !insideQuote) {
-                currentLine.push(entry.trim());
+                currentRow.push(entry.trim().replace(/^"|"$/g, ''));
                 entry = "";
             } else {
                 entry += char;
             }
         }
-        currentLine.push(entry.trim());
-
-        const obj = {};
-        headers.forEach((header, index) => {
-            if (header) { // Agar koi column header khali hai toh skip karega
-                obj[header] = currentLine[index] ? currentLine[index].replace(/^"|"$/g, '') : "";
-            }
-        });
-        result.push(obj);
+        currentRow.push(entry.trim().replace(/^"|"$/g, ''));
+        allRows.push(currentRow);
     }
-    return result;
+    return allRows;
 }
 
-
-// User login aur Google sheet data filter karne ka function
+// User login aur exact column number se matching
 async function loginUser() {
     const inputCode = document.getElementById("membercode-input").value.trim().toUpperCase();
     const errorMsg = document.getElementById("error-msg");
@@ -225,66 +218,70 @@ async function loginUser() {
     }
 
     try {
-        // Direct Google Sheet fetch call
         const response = await fetch(SHEET_CSV_URL);
         const csvText = await response.text();
-        const data = csvToJson(csvText);
+        const dataRows = parseCsvData(csvText);
 
-        // Member code ko sheets ke header se match karna
-        const user = data.find(row => 
-            (row["Member Code"] && row["Member Code"].trim().toUpperCase() === inputCode) ||
-            (row["Member Code (C)"] && row["Member Code (C)"].trim().toUpperCase() === inputCode)
+        // Google Sheet Column C (Member Code) = JavaScript Index 2 (0 se shuru)
+        const MEMBER_CODE_COLUMN_INDEX = 2; 
+
+        // Input code ko exact Column C (Index 2) se match kar rahe hain
+        const userRow = dataRows.find(row => 
+            row[MEMBER_CODE_COLUMN_INDEX] && row[MEMBER_CODE_COLUMN_INDEX].trim().toUpperCase() === inputCode
         );
 
-        if (user) {
+        if (userRow) {
             errorMsg.classList.add("hidden");
             document.getElementById("login-box").classList.add("hidden");
             document.getElementById("dashboard").classList.remove("hidden");
 
-            // Mapping Google Sheet columns to UI Elements
-            document.getElementById("user-name").innerText = user["Member Name"] || user["Member Name (D)"] || "";
-            document.getElementById("user-code").innerText = user["Member Code"] || user["Member Code (C)"] || "";
+            // Google Sheet ke Column Letter ke mutabik Mapping (A=0, B=1, C=2, etc.)
+            document.getElementById("user-name").innerText = userRow[3] || "";  // Column D (Member Name)
+            document.getElementById("user-code").innerText = userRow[2] || "";  // Column C (Member Code)
             
-            document.getElementById("d-sl").innerText = user["SL N0. (A)"] || "";
-            document.getElementById("d-status").innerText = user["Status (B)"] || "";
-            document.getElementById("d-mcode").innerText = user["Member Code"] || user["Member Code (C)"] || "";
-            document.getElementById("d-mname").innerText = user["Member Name"] || user["Member Name (D)"] || "";
-            document.getElementById("d-dept").innerText = user["Department (E)"] || "";
-            document.getElementById("d-branch").innerText = user["Branch (F)"] || "";
-            document.getElementById("d-pos").innerText = user["Position (G)"] || "";
+            document.getElementById("d-sl").innerText = userRow[0] || "";      // Column A
+            document.getElementById("d-status").innerText = userRow[1] || "";  // Column B
+            document.getElementById("d-mcode").innerText = userRow[2] || "";   // Column C
+            document.getElementById("d-mname").innerText = userRow[3] || "";   // Column D
+            document.getElementById("d-dept").innerText = userRow[4] || "";    // Column E
+            document.getElementById("d-branch").innerText = userRow[5] || "";  // Column F
+            document.getElementById("d-pos").innerText = userRow[6] || "";     // Column G
             
-            document.getElementById("d-monthly-sal").innerText = user["Monthly Salary 2026-27 (N)"] || "0";
-            document.getElementById("d-inc").innerText = user["Salary Increment Amt (O)"] || "0";
-            document.getElementById("d-final-sal").innerText = user["Final Monthly Salary (P)"] || "0";
+            // Monthly Salary (N) = Index 13, Increment (O) = Index 14, Final (P) = Index 15
+            document.getElementById("d-monthly-sal").innerText = userRow[13] || "0";
+            document.getElementById("d-inc").innerText = userRow[14] || "0";
+            document.getElementById("d-final-sal").innerText = userRow[15] || "0";
             
-            document.getElementById("d-m-days").innerText = user["Monthly No. Working Days (H)"] || "0";
-            document.getElementById("d-l-detail").innerText = user["Leave detail in Month (I)"] || "0";
-            document.getElementById("d-l-taken").innerText = user["Leave Taken by EMP. (J)"] || "0";
-            document.getElementById("d-present").innerText = user["Total Present Days (K)"] || "0";
-            document.getElementById("d-extra").innerText = user["Extra Working Days (L)"] || "0";
-            document.getElementById("d-total-work").innerText = user["Total Working Days (M)"] || "0";
-            document.getElementById("d-gross").innerText = user["Gross Salary After Leave Deduction (Q)"] || "0";
+            // H=7, I=8, J=9, K=10, L=11, M=12, Q=16
+            document.getElementById("d-m-days").innerText = userRow[7] || "0";
+            document.getElementById("d-l-detail").innerText = userRow[8] || "";
+            document.getElementById("d-l-taken").innerText = userRow[9] || "0";
+            document.getElementById("d-present").innerText = userRow[10] || "0";
+            document.getElementById("d-extra").innerText = userRow[11] || "0";
+            document.getElementById("d-total-work").innerText = userRow[12] || "0";
+            document.getElementById("d-gross").innerText = userRow[16] || "0";
             
-            document.getElementById("d-pf").innerText = user["April.26 PF Amount (R)"] || "0";
-            document.getElementById("d-tds").innerText = user["Other Recover/Deposits/TDS (S)"] || "0";
-            document.getElementById("d-total-deduct").innerText = user["Total Deduction Amount (T)"] || "0";
+            // R=17, S=18, T=19
+            document.getElementById("d-pf").innerText = userRow[17] || "0";
+            document.getElementById("d-tds").innerText = userRow[18] || "0";
+            document.getElementById("d-total-deduct").innerText = userRow[19] || "0";
             
-            document.getElementById("d-due").innerText = user["Salary Due for Payment (U)"] || "0";
-            document.getElementById("d-bank").innerText = user["Monthly Salary (Bank) (V)"] || "0";
-            document.getElementById("d-cash").innerText = user["Monthly Salary Non CBSE (Cash) (W)"] || "0";
-            document.getElementById("d-advance").innerText = user["Salary Advance Recovery Amt (X)"] || "0";
+            // U=20, V=21, W=22, X=23
+            document.getElementById("d-due").innerText = userRow[20] || "0";
+            document.getElementById("d-bank").innerText = userRow[21] || "0";
+            document.getElementById("d-cash").innerText = userRow[22] || "0";
+            document.getElementById("d-advance").innerText = userRow[23] || "0";
         } else {
             errorMsg.innerText = "Galat Member Code! Kripya sahi code dalein.";
             errorMsg.classList.remove("hidden");
         }
     } catch (error) {
         console.error("Error fetching data:", error);
-        errorMsg.innerText = "Data load karne mein dikkat aayi. Kripya Internet check karein.";
+        errorMsg.innerText = "Data load karne mein dikkat aayi. Kripya URL check karein.";
         errorMsg.classList.remove("hidden");
     }
 }
 
-// Logout karne ke liye function
 function logout() {
     document.getElementById("dashboard").classList.add("hidden");
     document.getElementById("login-box").classList.remove("hidden");
