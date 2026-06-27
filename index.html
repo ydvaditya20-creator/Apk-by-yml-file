@@ -1,200 +1,287 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Employee Salary Portal</title>
-
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    font-family:Arial,sans-serif;
-    background:#fff;
-}
-
-iframe{
-    width:100%;
-    height:100%;
-    border:none;
-    display:none;
-}
-
-#error-screen{
-    position:fixed;
-    inset:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#fff;
-    text-align:center;
-    z-index:999;
-    padding:20px;
-}
-
-.error-box{
-    max-width:350px;
-}
-
-.error-box h2{
-    color:#d32f2f;
-    margin-bottom:12px;
-    font-size:22px;
-}
-
-.error-box p{
-    color:#555;
-    margin-bottom:20px;
-    font-size:16px;
-    line-height:1.5;
-}
-
-button{
-    padding:12px 24px;
-    border:none;
-    border-radius:6px;
-    background:#1976d2;
-    color:#fff;
-    font-size:16px;
-    cursor:pointer;
-}
-
-button:active{
-    transform:scale(.98);
-}
-
-#loading{
-    position:fixed;
-    inset:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:white;
-    font-size:18px;
-    z-index:998;
-}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1024">
+    <title>Employee Salary Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; color: #333; margin: 0; }
+        .container { max-width: 1100px; margin: 10px auto; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); box-sizing: border-box; }
+        .center-text { text-align: center; }
+        
+        /* Login Box */
+        #login-box { max-width: 400px; margin: 0 auto; padding: 20px; }
+        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button { background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        .error { color: #dc3545; font-weight: bold; margin-top: 15px; }
+        .hidden { display: none; }
+        
+        /* Dashboard & Layout */
+        .welcome-header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .section-title { background: #007bff; color: white; padding: 8px 15px; font-size: 16px; font-weight: bold; border-radius: 4px; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase; }
+        
+        /* Horizontal Table Styling */
+        .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 10px 12px; border: 1px solid #dee2e6; text-align: center; font-size: 13px; }
+        th { background-color: #f8f9fa; color: #495057; font-weight: 600; }
+        
+        .logout-btn { background: #6c757d; width: auto; padding: 10px 20px; }
+        .logout-btn:hover { background: #5a6268; }
+    </style>
 </head>
 <body>
+<div class="container">
+    <!-- Login Section -->
+    <div id="login-box" class="center-text">
+        <h2>Employee Portal</h2>
+        <p>Apna Member Code enter karke details dekhein</p>
+        <input type="text" id="membercode-input" placeholder="Example: N-SHEM1230">
+        <button onclick="loginUser()">View Details</button>
+        <p id="error-msg" class="error hidden"></p>
+    </div>
 
-<div id="loading">
-    कृपया प्रतीक्षा करें...
-</div>
+    <!-- Dashboard Section -->
+    <div id="dashboard" class="hidden">
+        <div class="welcome-header">
+            <div>
+                <h2 style="margin: 0px; color: #007bff;" id="user-name"></h2>
+                <p style="margin: 5px 0 0 0; color: #666; font-weight: bold;" id="user-code"></p>
+            </div>
+            <button onclick="logout()" class="logout-btn">Logout</button>
+        </div>
 
-<div id="error-screen" style="display:none;">
-    <div class="error-box">
-        <h2>⚠️ इंटरनेट उपलब्ध नहीं है</h2>
-        <p>कृपया मोबाइल डेटा या Wi-Fi चालू करें।</p>
-        <button onclick="checkInternetAndLoad()">फिर से कोशिश करें</button>
+        <!-- SECTION 1: Staff Details -->
+        <div class="section-title">Staff Details </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>SL N0. (A)</th>
+                        <th>Status (B)</th>
+                        <th>Member Code (C)</th>
+                        <th>Member Name (D)</th>
+                        <th>Department (E)</th>
+                        <th>Branch (F)</th>
+                        <th>Position (G)</th>
+                        <th>Monthly Salary 2026-27 (N)</th>
+                        <th>Salary Increment Amt (O)</th>
+                        <th>Final Monthly Salary (P)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="d-sl"></td>
+                        <td id="d-status"></td>
+                        <td id="d-mcode"></td>
+                        <td id="d-mname"></td>
+                        <td id="d-dept"></td>
+                        <td id="d-branch"></td>
+                        <td id="d-pos"></td>
+                        <td>₹<span id="d-monthly-sal"></span></td>
+                        <td><span id="d-inc"></span></td>
+                        <td>₹<span id="d-final-sal"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECTION 2: Salary Details -->
+        <div class="section-title">Salary Details </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Monthly No. Working Days (H)</th>
+                        <th>Leave detail in Month (I)</th>
+                        <th>Leave Taken by EMP. (J)</th>
+                        <th>Total Present Days (K)</th>
+                        <th>Extra Working Days (L)</th>
+                        <th>Total Working Days (M)</th>
+                        <th>Gross Salary After Leave Deduction (Q)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="d-m-days"></td>
+                        <td id="d-l-detail"></td>
+                        <td id="d-l-taken"></td>
+                        <td id="d-present"></td>
+                        <td id="d-extra"></td>
+                        <td id="d-total-work"></td>
+                        <td>₹<span id="d-gross"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECTION 3: Deduction Details -->
+        <div class="section-title">Deduction Details </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>April.26 PF Amount (R)</th>
+                        <th>Other Recover/Deposits/TDS (S)</th>
+                        <th>Total Deduction Amount (T)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>₹<span id="d-pf"></span></td>
+                        <td>₹<span id="d-tds"></span></td>
+                        <td style="color: #dc3545; font-weight: bold;">₹<span id="d-total-deduct"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECTION 4: Payout & Recovery Details -->
+        <div class="section-title">Payout & Recovery Details </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Salary Due for Payment (U)</th>
+                        <th>Monthly Salary (Bank) (V)</th>
+                        <th>Monthly Salary Non CBSE (Cash) (W)</th>
+                        <th>Salary Advance Recovery Amt (X)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>₹<span id="d-due"></span></td>
+                        <td>₹<span id="d-bank"></span></td>
+                        <td>₹<span id="d-cash"></span></td>
+                        <td>₹<span id="d-advance"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<iframe
-id="web-view"
-allow="fullscreen"
-loading="eager">
-</iframe>
-
+<!-- JavaScript ko link karne ke liye niche di gayi line ko index.html mein rakhein -->
 <script>
+// ==========================================
+// CONFIGURATION: Apni Google Sheet ka URL dalein
+// ==========================================
+const SHEET_CSV_URL = "YOUR_GOOGLE_SHEET_CSV_URL_HERE"; 
 
-const TARGET_URL="https://ydvaditya20-creator.github.io/LL-salary/";
+// CSV format ko Javascript object mein badalne ka function
+function csvToJson(csvText) {
+    const lines = csvText.split("\n");
+    const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ''));
+    const result = [];
 
-const iframe=document.getElementById("web-view");
-const errorScreen=document.getElementById("error-screen");
-const loading=document.getElementById("loading");
-
-let loaded=false;
-
-async function hasInternet(){
-
-    try{
-
-        const controller=new AbortController();
-
-        const timeout=setTimeout(()=>{
-            controller.abort();
-        },5000);
-
-        await fetch(
-            "https://www.google.com/favicon.ico?"+Date.now(),
-            {
-                mode:"no-cors",
-                cache:"no-store",
-                signal:controller.signal
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        
+        const currentLine = [];
+        let insideQuote = false;
+        let entry = "";
+        
+        for (let char of lines[i]) {
+            if (char === '"') {
+                insideQuote = !insideQuote;
+            } else if (char === ',' && !insideQuote) {
+                currentLine.push(entry.trim());
+                entry = "";
+            } else {
+                entry += char;
             }
+        }
+        currentLine.push(entry.trim());
+
+        const obj = {};
+        headers.forEach((header, index) => {
+            obj[header] = currentLine[index] ? currentLine[index].replace(/^"|"$/g, '') : "";
+        });
+        result.push(obj);
+    }
+    return result;
+}
+
+// User login aur Google sheet data filter karne ka function
+async function loginUser() {
+    const inputCode = document.getElementById("membercode-input").value.trim().toUpperCase();
+    const errorMsg = document.getElementById("error-msg");
+
+    if (!inputCode) {
+        errorMsg.innerText = "Kripya Member Code enter karein.";
+        errorMsg.classList.remove("hidden");
+        return;
+    }
+
+    try {
+        // Direct Google Sheet fetch call
+        const response = await fetch(SHEET_CSV_URL);
+        const csvText = await response.text();
+        const data = csvToJson(csvText);
+
+        // Member code ko sheets ke header se match karna
+        const user = data.find(row => 
+            (row["Member Code"] && row["Member Code"].trim().toUpperCase() === inputCode) ||
+            (row["Member Code (C)"] && row["Member Code (C)"].trim().toUpperCase() === inputCode)
         );
 
-        clearTimeout(timeout);
+        if (user) {
+            errorMsg.classList.add("hidden");
+            document.getElementById("login-box").classList.add("hidden");
+            document.getElementById("dashboard").classList.remove("hidden");
 
-        return true;
-
-    }catch(e){
-
-        return false;
-
-    }
-
-}
-
-async function checkInternetAndLoad(){
-
-    loading.style.display="flex";
-    errorScreen.style.display="none";
-
-    const online=await hasInternet();
-
-    if(online){
-
-        if(!loaded){
-
-            iframe.onload=function(){
-
-                loading.style.display="none";
-                errorScreen.style.display="none";
-                iframe.style.display="block";
-
-            };
-
-            iframe.src=TARGET_URL;
-            loaded=true;
-
-        }else{
-
-            loading.style.display="none";
-            iframe.style.display="block";
-
+            // Mapping Google Sheet columns to UI Elements
+            document.getElementById("user-name").innerText = user["Member Name"] || user["Member Name (D)"] || "";
+            document.getElementById("user-code").innerText = user["Member Code"] || user["Member Code (C)"] || "";
+            
+            document.getElementById("d-sl").innerText = user["SL N0. (A)"] || "";
+            document.getElementById("d-status").innerText = user["Status (B)"] || "";
+            document.getElementById("d-mcode").innerText = user["Member Code"] || user["Member Code (C)"] || "";
+            document.getElementById("d-mname").innerText = user["Member Name"] || user["Member Name (D)"] || "";
+            document.getElementById("d-dept").innerText = user["Department (E)"] || "";
+            document.getElementById("d-branch").innerText = user["Branch (F)"] || "";
+            document.getElementById("d-pos").innerText = user["Position (G)"] || "";
+            
+            document.getElementById("d-monthly-sal").innerText = user["Monthly Salary 2026-27 (N)"] || "0";
+            document.getElementById("d-inc").innerText = user["Salary Increment Amt (O)"] || "0";
+            document.getElementById("d-final-sal").innerText = user["Final Monthly Salary (P)"] || "0";
+            
+            document.getElementById("d-m-days").innerText = user["Monthly No. Working Days (H)"] || "0";
+            document.getElementById("d-l-detail").innerText = user["Leave detail in Month (I)"] || "0";
+            document.getElementById("d-l-taken").innerText = user["Leave Taken by EMP. (J)"] || "0";
+            document.getElementById("d-present").innerText = user["Total Present Days (K)"] || "0";
+            document.getElementById("d-extra").innerText = user["Extra Working Days (L)"] || "0";
+            document.getElementById("d-total-work").innerText = user["Total Working Days (M)"] || "0";
+            document.getElementById("d-gross").innerText = user["Gross Salary After Leave Deduction (Q)"] || "0";
+            
+            document.getElementById("d-pf").innerText = user["April.26 PF Amount (R)"] || "0";
+            document.getElementById("d-tds").innerText = user["Other Recover/Deposits/TDS (S)"] || "0";
+            document.getElementById("d-total-deduct").innerText = user["Total Deduction Amount (T)"] || "0";
+            
+            document.getElementById("d-due").innerText = user["Salary Due for Payment (U)"] || "0";
+            document.getElementById("d-bank").innerText = user["Monthly Salary (Bank) (V)"] || "0";
+            document.getElementById("d-cash").innerText = user["Monthly Salary Non CBSE (Cash) (W)"] || "0";
+            document.getElementById("d-advance").innerText = user["Salary Advance Recovery Amt (X)"] || "0";
+        } else {
+            errorMsg.innerText = "Galat Member Code! Kripya sahi code dalein.";
+            errorMsg.classList.remove("hidden");
         }
-
-    }else{
-
-        loading.style.display="none";
-        iframe.style.display="none";
-        errorScreen.style.display="flex";
-
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        errorMsg.innerText = "Data load karne mein dikkat aayi. Kripya Internet check karein.";
+        errorMsg.classList.remove("hidden");
     }
-
 }
 
-window.onload=function(){
+// Logout karne ke liye function
+function logout() {
+    document.getElementById("dashboard").classList.add("hidden");
+    document.getElementById("login-box").classList.remove("hidden");
+    document.getElementById("membercode-input").value = "";
+}
 
-    setTimeout(checkInternetAndLoad,1500);
-
-};
-
-window.addEventListener("online",checkInternetAndLoad);
-window.addEventListener("offline",checkInternetAndLoad);
-
-setInterval(checkInternetAndLoad,5000);
-
+    
 </script>
-
 </body>
 </html>
