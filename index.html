@@ -1,294 +1,139 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1024">
-    <title>Employee Salary Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Login Portal (CSV)</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; color: #333; margin: 0; }
-        .container { max-width: 1100px; margin: 10px auto; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); box-sizing: border-box; }
-        .center-text { text-align: center; }
-        
-        /* Login Box */
-        #login-box { max-width: 400px; margin: 0 auto; padding: 20px; }
-        input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
-        button:hover { background: #0056b3; }
-        .error { color: #dc3545; font-weight: bold; margin-top: 15px; }
-        .hidden { display: none; }
-        
-        /* Dashboard & Layout */
-        .welcome-header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
-        .section-title { background: #007bff; color: white; padding: 8px 15px; font-size: 16px; font-weight: bold; border-radius: 4px; margin-top: 25px; margin-bottom: 10px; text-transform: uppercase; }
-        
-        /* Horizontal Table Styling */
-        .table-responsive { width: 100%; overflow-x: auto; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th, td { padding: 10px 12px; border: 1px solid #dee2e6; text-align: center; font-size: 13px; }
-        th { background-color: #f8f9fa; color: #495057; font-weight: 600; }
-        
-        .logout-btn { background: #6c757d; width: auto; padding: 10px 20px; }
-        .logout-btn:hover { background: #5a6268; }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h2 { text-align: center; color: #333; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #28a745; border: none; color: white; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        button:hover { background-color: #218838; }
+        #error-msg { color: red; text-align: center; margin-top: 10px; font-weight: bold; }
+        #data-container { display: none; margin-top: 20px; border-top: 2px solid #28a745; padding-top: 15px; }
+        .data-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .data-label { font-weight: bold; color: #666; }
+        .data-value { color: #111; }
+        .loader { display: none; text-align: center; font-style: italic; color: #666; }
     </style>
 </head>
 <body>
+
 <div class="container">
-    <!-- Login Section -->
-    <div id="login-box" class="center-text">
-        <h2>Employee Portal</h2>
-        <p>Apna Member Code enter karke details dekhein</p>
-        <input type="text" id="membercode-input" placeholder="Example: N-SHEM1230">
-        <button onclick="loginUser()">View Details</button>
-        <p id="error-msg" class="error hidden"></p>
+    <!-- लॉगिन बॉक्स -->
+    <div id="login-box">
+        <h2>सदस्य लॉगिन (CSV Mode)</h2>
+        <div class="form-group">
+            <label for="memberCode">अपना मेम्बर कोड दर्ज करें:</label>
+            <input type="text" id="memberCode" placeholder="जैसे: MEM101" required>
+        </div>
+        <button onclick="checkMember()">डेटा खोजें</button>
+        <div id="loader" class="loader">शीट लोड हो रही है, कृपया रुकें...</div>
+        <div id="error-msg"></div>
     </div>
 
-    <!-- Dashboard Section -->
-    <div id="dashboard" class="hidden">
-        <div class="welcome-header">
-            <div>
-                <h2 style="margin: 0px; color: #007bff;" id="user-name"></h2>
-                <p style="margin: 5px 0 0 0; color: #666; font-weight: bold;" id="user-code"></p>
-            </div>
-            <button onclick="logout()" class="logout-btn">Logout</button>
-        </div>
-
-        <!-- SECTION 1: Staff Details -->
-        <div class="section-title">Staff Details </div>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>SL N0. (A)</th>
-                        <th>Status (B)</th>
-                        <th>Member Code (C)</th>
-                        <th>Member Name (D)</th>
-                        <th>Department (E)</th>
-                        <th>Branch (F)</th>
-                        <th>Position (G)</th>
-                        <th>Monthly Salary 2026-27 (N)</th>
-                        <th>Salary Increment Amt (O)</th>
-                        <th>Final Monthly Salary (P)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td id="d-sl"></td>
-                        <td id="d-status"></td>
-                        <td id="d-mcode"></td>
-                        <td id="d-mname"></td>
-                        <td id="d-dept"></td>
-                        <td id="d-branch"></td>
-                        <td id="d-pos"></td>
-                        <td>₹<span id="d-monthly-sal"></span></td>
-                        <td><span id="d-inc"></span></td>
-                        <td>₹<span id="d-final-sal"></span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- SECTION 2: Salary Details -->
-        <div class="section-title">Salary Details </div>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Monthly No. Working Days (H)</th>
-                        <th>Leave detail in Month (I)</th>
-                        <th>Leave Taken by EMP. (J)</th>
-                        <th>Total Present Days (K)</th>
-                        <th>Extra Working Days (L)</th>
-                        <th>Total Working Days (M)</th>
-                        <th>Gross Salary After Leave Deduction (Q)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td id="d-m-days"></td>
-                        <td id="d-l-detail"></td>
-                        <td id="d-l-taken"></td>
-                        <td id="d-present"></td>
-                        <td id="d-extra"></td>
-                        <td id="d-total-work"></td>
-                        <td>₹<span id="d-gross"></span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- SECTION 3: Deduction Details -->
-        <div class="section-title">Deduction Details </div>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>April.26 PF Amount (R)</th>
-                        <th>Other Recover/Deposits/TDS (S)</th>
-                        <th>Total Deduction Amount (T)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>₹<span id="d-pf"></span></td>
-                        <td>₹<span id="d-tds"></span></td>
-                        <td style="color: #dc3545; font-weight: bold;">₹<span id="d-total-deduct"></span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- SECTION 4: Payout & Recovery Details -->
-        <div class="section-title">Payout & Recovery Details </div>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Salary Due for Payment (U)</th>
-                        <th>Monthly Salary (Bank) (V)</th>
-                        <th>Monthly Salary Non CBSE (Cash) (W)</th>
-                        <th>Salary Advance Recovery Amt (X)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>₹<span id="d-due"></span></td>
-                        <td>₹<span id="d-bank"></span></td>
-                        <td>₹<span id="d-cash"></span></td>
-                        <td>₹<span id="d-advance"></span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+    <!-- डेटा डिस्प्ले बॉक्स -->
+    <div id="data-container">
+        <h2>आपका विवरण (Your Details)</h2>
+        <div id="details-list"></div>
+        <button onclick="logout()" style="background-color: #6c757d; margin-top: 15px;">वापस जाएँ</button>
     </div>
 </div>
 
-<!-- JavaScript ko link karne ke liye niche di gayi line ko index.html mein rakhein -->
 <script>
-// ==========================================
-// CONFIGURATION: Apni Google Sheet ka URL dalein
-// ==========================================
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTfgXD0Gp6sgfHle6CuNaTDfGGVTgay8-ZaYbO161POxfxAjo9s0ysmglv6_JHsasboyKKIYxDF2V4Q/pub?gid=1259613237&single=true&output=csve=true"; 
+    // यहाँ अपनी Published CSV का URL पेस्ट करें
+    const CSV_URL = "YOUR_PUBLISHED_CSV_URL_HERE";
 
-// CSV format ko Javascript object mein badalne ka function
+    // CSV को एरे (Rows & Columns) में बदलने का फंक्शन
+    function parseCSV(text) {
+        let lines = text.split('\n');
+        return lines.map(line => {
+            // बेसिक CSV स्प्लिट (कोमा के आधार पर)
+            return line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => val.replace(/^"|"$/g, '').trim());
+        });
+    }
 
-// ==========================================
-// CONFIGURATION: Apni Google Sheet ka CSV URL dalein
-// ==========================================
-const SHEET_CV_URL = "YOUR_GOOGLE_SHEET_CSV_URL_HERE"; 
+    async function checkMember() {
+        const memberCodeInput = document.getElementById('memberCode').value.trim();
+        const errorMsg = document.getElementById('error-msg');
+        const loader = document.getElementById('loader');
+        const dataContainer = document.getElementById('data-container');
+        const detailsList = document.getElementById('details-list');
 
-// CSV data ko exact array index ke hisaab se parse karne ka function
-function parseCsvData(csvText) {
-    const lines = csvText.split("\n");
-    const allRows = [];
+        errorMsg.innerText = "";
+        detailsList.innerHTML = "";
 
-    // Row 4 se data shuru hai (JavaScript index = 3)
-    // Hum pehle ki 3 rows (Index 0, 1, 2) ko skip kar rahe hain
-    for (let i = 3; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        
-        const currentRow = [];
-        let insideQuote = false;
-        let entry = "";
-        
-        for (let char of lines[i]) {
-            if (char === '"') {
-                insideQuote = !insideQuote;
-            } else if (char === ',' && !insideQuote) {
-                currentRow.push(entry.trim().replace(/^"|"$/g, ''));
-                entry = "";
-            } else {
-                entry += char;
+        if (!memberCodeInput) {
+            errorMsg.innerText = "कृपया मेम्बर कोड डालें!";
+            return;
+        }
+
+        loader.style.display = "block";
+
+        try {
+            // सीधे गूगल शीट से CSV डाउनलोड करना
+            const response = await fetch(CSV_URL);
+            const csvText = await response.text();
+            const rows = parseCSV(csvText);
+
+            loader.style.display = "none";
+
+            // Row 3 हेडर है (JavaScript इंडेक्स 2 होगा क्योंकि काउंटिंग 0 से शुरू होती है)
+            const headers = rows[2]; 
+            
+            if (!headers) {
+                errorMsg.innerText = "शीट का हेडर फॉर्मेट सही नहीं है।";
+                return;
             }
+
+            let memberFound = false;
+
+            // Row 4 से डेटा शुरू है (इंडेक्स 3 से लूप शुरू करेंगे)
+            for (let i = 3; i < rows.length; i++) {
+                let currentRow = rows[i];
+                
+                // Column C मेम्बर कोड है (इंडेक्स 2 होगा: A=0, B=1, C=2)
+                if (currentRow && currentRow[2] === memberCodeInput) {
+                    memberFound = true;
+                    
+                    document.getElementById('login-box').style.display = "none";
+                    dataContainer.style.display = "block";
+
+                    // सारे कॉलम्स को स्क्रीन पर दिखाना
+                    headers.forEach((header, index) => {
+                        if (header && header.trim() !== "") {
+                            const value = currentRow[index] || "-";
+                            const rowDiv = document.createElement('div');
+                            rowDiv.className = 'data-row';
+                            rowDiv.innerHTML = `<span class="data-label">${header}:</span> <span class="data-value">${value}</span>`;
+                            detailsList.appendChild(rowDiv);
+                        }
+                    });
+                    break; 
+                }
+            }
+
+            if (!memberFound) {
+                errorMsg.innerText = "गलत मेम्बर कोड! कोई रिकॉर्ड नहीं मिला।";
+            }
+
+        } catch (error) {
+            loader.style.display = "none";
+            errorMsg.innerText = "डेटा लोड करने में समस्या आई। कृपया इंटरनेट चेक करें।";
+            console.error(error);
         }
-        currentRow.push(entry.trim().replace(/^"|"$/g, ''));
-        allRows.push(currentRow);
-    }
-    return allRows;
-}
-
-// User login aur exact column number se matching
-async function loginUser() {
-    const inputCode = document.getElementById("membercode-input").value.trim().toUpperCase();
-    const errorMsg = document.getElementById("error-msg");
-
-    if (!inputCode) {
-        errorMsg.innerText = "Kripya Member Code enter karein.";
-        errorMsg.classList.remove("hidden");
-        return;
     }
 
-    try {
-        const response = await fetch(SHEET_CSV_URL);
-        const csvText = await response.text();
-        const dataRows = parseCsvData(csvText);
-
-        // Google Sheet Column C (Member Code) = JavaScript Index 2 (0 se shuru)
-        const MEMBER_CODE_COLUMN_INDEX = 2; 
-
-        // Input code ko exact Column C (Index 2) se match kar rahe hain
-        const userRow = dataRows.find(row => 
-            row[MEMBER_CODE_COLUMN_INDEX] && row[MEMBER_CODE_COLUMN_INDEX].trim().toUpperCase() === inputCode
-        );
-
-        if (userRow) {
-            errorMsg.classList.add("hidden");
-            document.getElementById("login-box").classList.add("hidden");
-            document.getElementById("dashboard").classList.remove("hidden");
-
-            // Google Sheet ke Column Letter ke mutabik Mapping (A=0, B=1, C=2, etc.)
-            document.getElementById("user-name").innerText = userRow[3] || "";  // Column D (Member Name)
-            document.getElementById("user-code").innerText = userRow[2] || "";  // Column C (Member Code)
-            
-            document.getElementById("d-sl").innerText = userRow[0] || "";      // Column A
-            document.getElementById("d-status").innerText = userRow[1] || "";  // Column B
-            document.getElementById("d-mcode").innerText = userRow[2] || "";   // Column C
-            document.getElementById("d-mname").innerText = userRow[3] || "";   // Column D
-            document.getElementById("d-dept").innerText = userRow[4] || "";    // Column E
-            document.getElementById("d-branch").innerText = userRow[5] || "";  // Column F
-            document.getElementById("d-pos").innerText = userRow[6] || "";     // Column G
-            
-            // Monthly Salary (N) = Index 13, Increment (O) = Index 14, Final (P) = Index 15
-            document.getElementById("d-monthly-sal").innerText = userRow[13] || "0";
-            document.getElementById("d-inc").innerText = userRow[14] || "0";
-            document.getElementById("d-final-sal").innerText = userRow[15] || "0";
-            
-            // H=7, I=8, J=9, K=10, L=11, M=12, Q=16
-            document.getElementById("d-m-days").innerText = userRow[7] || "0";
-            document.getElementById("d-l-detail").innerText = userRow[8] || "";
-            document.getElementById("d-l-taken").innerText = userRow[9] || "0";
-            document.getElementById("d-present").innerText = userRow[10] || "0";
-            document.getElementById("d-extra").innerText = userRow[11] || "0";
-            document.getElementById("d-total-work").innerText = userRow[12] || "0";
-            document.getElementById("d-gross").innerText = userRow[16] || "0";
-            
-            // R=17, S=18, T=19
-            document.getElementById("d-pf").innerText = userRow[17] || "0";
-            document.getElementById("d-tds").innerText = userRow[18] || "0";
-            document.getElementById("d-total-deduct").innerText = userRow[19] || "0";
-            
-            // U=20, V=21, W=22, X=23
-            document.getElementById("d-due").innerText = userRow[20] || "0";
-            document.getElementById("d-bank").innerText = userRow[21] || "0";
-            document.getElementById("d-cash").innerText = userRow[22] || "0";
-            document.getElementById("d-advance").innerText = userRow[23] || "0";
-        } else {
-            errorMsg.innerText = "Galat Member Code! Kripya sahi code dalein.";
-            errorMsg.classList.remove("hidden");
-        }
-    } catch (error) {
-        console.error("Error fetching data:", error);
-        errorMsg.innerText = "Data load karne mein dikkat aayi. Kripya URL check karein.";
-        errorMsg.classList.remove("hidden");
+    function logout() {
+        document.getElementById('data-container').style.display = "none";
+        document.getElementById('login-box').style.display = "block";
+        document.getElementById('memberCode').value = "";
     }
-}
-
-function logout() {
-    document.getElementById("dashboard").classList.add("hidden");
-    document.getElementById("login-box").classList.remove("hidden");
-    document.getElementById("membercode-input").value = "";
-}
-
-    
 </script>
+
 </body>
 </html>
