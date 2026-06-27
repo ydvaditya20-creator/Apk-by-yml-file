@@ -172,9 +172,16 @@ const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTfgXD0Gp
 // CSV format ko Javascript object mein badalne ka function
 function csvToJson(csvText) {
     const lines = csvText.split("\n");
-    const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ''));
+    
+    // Row 3 aapka sub(main) header hai jisme Column Names hain
+    // JavaScript indexing 0 se shuru hoti hai, isliye Row 3 = Index 2
+    const headerLine = lines[2]; 
+    if (!headerLine) return [];
+    
+    const headers = headerLine.split(",").map(h => h.trim().replace(/^"|"$/g, ''));
     const result = [];
 
+    // Data Row 4 se shuru ho raha hai (Row 4 = Index 3)
     for (let i = 3; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
         
@@ -196,12 +203,15 @@ function csvToJson(csvText) {
 
         const obj = {};
         headers.forEach((header, index) => {
-            obj[header] = currentLine[index] ? currentLine[index].replace(/^"|"$/g, '') : "";
+            if (header) { // Agar koi column header khali hai toh skip karega
+                obj[header] = currentLine[index] ? currentLine[index].replace(/^"|"$/g, '') : "";
+            }
         });
         result.push(obj);
     }
     return result;
 }
+
 
 // User login aur Google sheet data filter karne ka function
 async function loginUser() {
