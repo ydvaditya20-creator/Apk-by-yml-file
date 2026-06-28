@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mera Home Page</title>
+</head>
+<body>
+
+    <h1>Welcome to My Website</h1>
+    <p>Neeche diye gaye links par click karke aap doosre pages par ja sakte hain:</p>
+
+    <!-- Apne hi computer ke doosre/teesre pages ke links -->
+    <h2>Local Pages Ke Links:</h2>
+    <ul>
+        <li><a href="page2.html">Doosra Page Kholein</a></li>
+        <li><a href="page3.html">Teesra Page Kholein</a></li>
+    </ul>
+
+    <!-- Bahari website ka link (Naye tab mein khulega) -->
+    <h2>Bahari Website Ka Link:</h2>
+    <p>
+        <a href="https://google.com" target="_blank">Google Par Jayein (Open in New Tab)</a>
+    </p>
+
+</body>
+</html>
