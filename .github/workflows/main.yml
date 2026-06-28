@@ -65,7 +65,7 @@ jobs:
     run: |
          find android -name MainActivity.*
   - name: Check File Content
-    run: cat android/app/src/main/java/com/example/myttapp/MainActivity.java
+    run: cat android/app/src/main/java/com/example/myttap/MainActivity.java
   
   - name: List All Generated Files & Folders
     run: |
